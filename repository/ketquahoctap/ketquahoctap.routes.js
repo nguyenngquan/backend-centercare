@@ -13,7 +13,8 @@ module.exports = function (router) {
 
   // router.route('/employees/department')
   //     .get(employeeRepository.getMulti);
-
+  router.route("/kqhts/hocvien/:id").get(ketquahoctapRepository.getByIdHocVien);
+  router.route("/kqhts/baikiemtra").get(ketquahoctapRepository.getByIdKiemTra);
   router.use("/kqhts/:id", ketquahoctapRepository.intercept);
 
   router

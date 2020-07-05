@@ -46,6 +46,46 @@ function HocvienRepository(dbContext) {
     }
   }
 
+  function getByIdLop(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idLop",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idBaiTap, ngaygiaoBT, ngayphainop, loaibaigiao, ghichu from BaiTap inner join Lop on Lop.idLop = BaiTap.idLop where Lop.idLop = @idLop";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data,
+      };
+      return res.json(response(data, error));
+    });
+  }
+
+  function getByIdHocVien(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idHocVien",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idBaiTap, ngaygiaoBT, ngayphainop, loaibaigiao, ghichu from BaiTap inner join Lop on Lop.idLop = BaiTap.idLop inner join HocVien on HocVien.idLop = Lop.idLop where HocVien.idHocVien = @idHocVien";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data: data ? data : [],
+      };
+      return res.json(response(data, error));
+    });
+  }
+
   function getLop(req, res) {
     return res.json(req.data);
   }
@@ -55,23 +95,23 @@ function HocvienRepository(dbContext) {
 
     parameters.push({
       name: "ngaygiaoBT",
-      type: TYPES.DateTime,
+      type: TYPES.Date,
       val: new Date(req.body.ngaygiaoBT),
     });
     parameters.push({
       name: "ngayphainop",
-      type: TYPES.DateTime,
+      type: TYPES.Date,
       val: new Date(req.body.ngayphainop),
     });
     parameters.push({
       name: "loaibaigiao",
-      type: TYPES.VarChar,
+      type: TYPES.NVarChar,
       val: req.body.loaibaigiao,
     });
     parameters.push({
-      name: "ghinho",
-      type: TYPES.VarChar,
-      val: req.body.ghinho,
+      name: "ghichu",
+      type: TYPES.NVarChar,
+      val: req.body.ghichu,
     });
     parameters.push({ name: "idLop", type: TYPES.Int, val: req.body.idLop });
 
@@ -79,7 +119,14 @@ function HocvienRepository(dbContext) {
     //     parameters.push({name:'@'+property[0]})
     // });
 
-    dbContext.post("insertBaitap", parameters, function (error, data) {
+    dbContext.post("insertBaiTap", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          message: "Đã thêm bài kiểm tra mới.",
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -87,6 +134,11 @@ function HocvienRepository(dbContext) {
   function updateBaiTaps(req, res) {
     var parameters = [];
 
+    parameters.push({
+      name: "idBaiTap",
+      type: TYPES.Int,
+      val: req.body.idBaiTap,
+    });
     parameters.push({
       name: "ngaygiaoBT",
       type: TYPES.DateTime,
@@ -99,13 +151,13 @@ function HocvienRepository(dbContext) {
     });
     parameters.push({
       name: "loaibaigiao",
-      type: TYPES.VarChar,
+      type: TYPES.NVarChar,
       val: req.body.loaibaigiao,
     });
     parameters.push({
-      name: "ghinho",
-      type: TYPES.VarChar,
-      val: req.body.ghinho,
+      name: "ghichu",
+      type: TYPES.NVarChar,
+      val: req.body.ghichu,
     });
     parameters.push({ name: "idLop", type: TYPES.Int, val: req.body.idLop });
 
@@ -113,7 +165,14 @@ function HocvienRepository(dbContext) {
     //     parameters.push({name:'@'+property[0]})
     // });
 
-    dbContext.post("updateBaitap", parameters, function (error, data) {
+    dbContext.post("updateBaiTap", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          message: "Đã cập nhật thông tin bài kiểm tra.",
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -209,6 +268,8 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findBaiTap,
     delete: deleteBaiTap,
+    getByIdLop: getByIdLop,
+    getByIdHocVien: getByIdHocVien,
   };
 }
 

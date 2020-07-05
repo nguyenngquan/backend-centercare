@@ -7,7 +7,7 @@ module.exports = function (router) {
 
   router
     .route("/nhomlops")
-    .get(roleMiddleware("NV"), nhomlopRepository.getAll)
+    .get(nhomlopRepository.getAll)
     .post(roleMiddleware("NV"), nhomlopRepository.insert)
     .put(roleMiddleware("NV"), nhomlopRepository.update);
 

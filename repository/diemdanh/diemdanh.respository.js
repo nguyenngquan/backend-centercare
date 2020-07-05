@@ -1,5 +1,8 @@
 var response = require("../../shared/response");
 var TYPES = require("tedious").TYPES;
+var dateUtils = require("../../common/DateUtils");
+
+const { convertDate } = dateUtils;
 
 function HocvienRepository(dbContext) {
   function findDiemDanh(req, res, next) {
@@ -23,6 +26,79 @@ function HocvienRepository(dbContext) {
       });
     }
   }
+  function getDiemDanhFromNgay(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "ngaydiemdanh",
+      type: TYPES.Date,
+      val: req.query.ngaydiemdanh,
+    });
+    var query =
+      "SELECT * FROM DiemDanh inner join HocVien on DiemDanh.idHocVien = HocVien.idHocVien WHERE DiemDanh.ngayhoc = @ngaydiemdanh";
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      if (error) {
+        return res.json(response(data, error));
+      }
+      if (data) {
+        data = {
+          success: true,
+          daDiemDanh: true,
+          data,
+        };
+        return res.json(response(data, error));
+      } else {
+        var query =
+          "SELECT * FROM HocVien INNER JOIN dbo.Lop ON Lop.idLop = HocVien.idLop INNER JOIN dbo.LichHoc ON LichHoc.idLop = Lop.idLop WHERE LichHoc.ngayhoc = @ngaydiemdanh";
+        dbContext.getQuery(query, parameters, false, function (error, data) {
+          if (!error) {
+            data = {
+              success: true,
+              data: data ? data : [],
+            };
+          }
+          return res.json(response(data, error));
+        });
+      }
+    });
+  }
+
+  function getDiemDanhByMonth(req, res) {
+    const { month, year } = req.query;
+    const { startDate, endDate } = convertDate(year, month);
+    console.log(startDate);
+    console.log(endDate);
+
+    var parameters = [];
+    parameters.push({
+      name: "startDate",
+      type: TYPES.Date,
+      val: startDate,
+    });
+    parameters.push({
+      name: "endDate",
+      type: TYPES.Date,
+      val: endDate,
+    });
+
+    var query =
+      "SELECT DISTINCT TOP 50 ngayhoc FROM DiemDanh WHERE DiemDanh.ngayhoc between @startDate and @endDate";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          data: data ? data : [],
+        };
+      }
+      return res.json(response(data, error));
+    });
+  }
+
+  function getDiemdanhs(req, res) {
+    dbContext.get("GetDiemdanh", function (error, data) {
+      return res.json(response(data, error));
+    });
+  }
 
   function getDiemdanhs(req, res) {
     dbContext.get("GetDiemdanh", function (error, data) {
@@ -35,44 +111,27 @@ function HocvienRepository(dbContext) {
   }
 
   function insertDiemDanhs(req, res) {
-    var parameters = [];
+    var query = `INSERT INTO [dbo].DiemDanh ([tuan],[ngayhoc],[cahoc],[ghichu],[trangthai],[idHocVien])
+      VALUES
+      ${req.body
+        .map(
+          (item) => `(
+        '${item.tuan}',
+        '${item.ngayhoc}',
+        '${item.cahoc}',
+        N'${item.ghichu}',
+        N'${item.trangthai}',
+        '${item.idHocVien}'
+      )`
+        )
+        .join(",")};`;
 
-    parameters.push({
-      name: "tuan",
-      type: TYPES.Int,
-      val: req.body.tuan,
-    });
-    parameters.push({
-      name: "ngayhoc",
-      type: TYPES.DateTime,
-      val: new Date(req.body.ngayhoc),
-    });
-    parameters.push({
-      name: "cahoc",
-      type: TYPES.int,
-      val: req.body.cahoc,
-    });
-    parameters.push({
-      name: "ghichu",
-      type: TYPES.VarChar,
-      val: req.body.ghichu,
-    });
-    parameters.push({
-      name: "trangthai",
-      type: TYPES.VarChar,
-      val: req.body.trangthai,
-    });
-    parameters.push({
-      name: "idHocVien",
-      type: TYPES.int,
-      val: req.body.idHocVien,
-    });
-
-    // Object.entries(employee).forEach((property)=>{
-    //     parameters.push({name:'@'+property[0]})
-    // });
-
-    dbContext.post("insertDiemdanh", parameters, function (error, data) {
+    dbContext.getQuery(query, [], false, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -211,6 +270,8 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findDiemDanh,
     delete: deleteDiemDanh,
+    getDiemDanhFromNgay: getDiemDanhFromNgay,
+    getDiemDanhByMonth: getDiemDanhByMonth,
   };
 }
 

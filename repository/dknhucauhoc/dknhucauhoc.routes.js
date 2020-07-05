@@ -8,11 +8,12 @@ module.exports = function (router) {
   router
     .route("/dknhucauhocs")
     .get(dknhucauhocRepository.getAll)
-    .post(roleMiddleware("NV"), dknhucauhocRepository.insert)
-    .put(roleMiddleware("NV"), dknhucauhocRepository.update);
+    .post(dknhucauhocRepository.insert)
+    .put(dknhucauhocRepository.update);
 
-  // router.route('/employees/department')
-  //     .get(employeeRepository.getMulti);
+  router
+    .route("/dknhucauhocs/getByIdNhuCauHoc/:idNhuCauHoc")
+    .get(dknhucauhocRepository.getByIdNhuCauHoc);
 
   router.use("/dknhucauhocs/:idDKNhuCauHoc", dknhucauhocRepository.intercept);
 

@@ -12,7 +12,10 @@ module.exports = function (router) {
 
   // router.route('/employees/department')
   //     .get(employeeRepository.getMulti);
-
+  router
+    .route("/diemdanhs/getDiemDanhFromNgay")
+    .get(diemdanhRepository.getDiemDanhFromNgay);
+  router.route("/diemdanhs/getBy").get(diemdanhRepository.getDiemDanhByMonth);
   router.use("/diemdanhs/:idDiemDanh", diemdanhRepository.intercept);
 
   router

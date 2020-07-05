@@ -14,6 +14,8 @@ module.exports = function (router) {
   // router.route('/employees/department')
   //     .get(employeeRepository.getMulti);
 
+  router.route("/nhucauhocs/hocvien/:id").get(hocvienRepository.getByIdHocVien);
+
   router.use("/nhucauhocs/:id", hocvienRepository.intercept);
 
   router

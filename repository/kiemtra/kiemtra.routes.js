@@ -13,7 +13,8 @@ module.exports = function (router) {
 
   // router.route('/employees/department')
   //     .get(employeeRepository.getMulti);
-
+  router.route("/kiemtras/lop/:id").get(kiemtraRepository.getByIdLop);
+  router.route("/kiemtras/hocvien/:id").get(kiemtraRepository.getByIdHocVien);
   router.use("/kiemtras/:idKiemTra", kiemtraRepository.intercept);
 
   router

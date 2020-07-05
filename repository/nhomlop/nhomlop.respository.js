@@ -34,25 +34,12 @@ function HocvienRepository(dbContext) {
   }
 
   function getNhomLops(req, res) {
-    if (req.query.salary) {
-      var parameters = [];
-
-      parameters.push({
-        name: "Salary",
-        type: TYPES.Int,
-        val: req.query.salary,
-      });
-
-      var query = "select * from tbl_employee where salary>=@Salary";
-
-      dbContext.getQuery(query, parameters, false, function (error, data) {
-        return res.json(response(data, error));
-      });
-    } else {
-      dbContext.get("GetNhomlop", function (error, data) {
-        return res.json(response(data, error));
-      });
-    }
+    dbContext.get("GetNhomlop", function (error, data) {
+      if (!error) {
+        data.success = true;
+      }
+      return res.json(response(data, error));
+    });
   }
 
   function getLop(req, res) {
@@ -111,6 +98,11 @@ function HocvienRepository(dbContext) {
         response(null, updatedError("Độ dài mã lớp tối đa 10 kí tự"))
       );
     }
+    parameters.push({
+      name: "idNhom",
+      type: TYPES.Int,
+      val: req.body.idNhom,
+    });
     parameters.push({
       name: "manhom",
       type: TYPES.VarChar,

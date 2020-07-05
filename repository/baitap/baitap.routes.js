@@ -13,7 +13,8 @@ module.exports = function (router) {
 
   // router.route('/employees/department')
   //     .get(employeeRepository.getMulti);
-
+  router.route("/baitaps/lop/:id").get(baitapRepository.getByIdLop);
+  router.route("/baitaps/hocvien/:id").get(baitapRepository.getByIdHocVien);
   router.use("/baitaps/:idBaiTap", baitapRepository.intercept);
 
   router

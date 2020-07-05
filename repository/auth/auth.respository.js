@@ -26,16 +26,22 @@ function authRepository(dbContext) {
       let responseData = null;
       if (data) {
         const token = jwt.sign(
-          { role: "HV", username: req.body.username },
+          {
+            role: "HV",
+            username: req.body.username,
+            idHocVien: data[0].idHocVien,
+            idLop: data[0].idLop,
+          },
           process.env.SECRET_KEY
         );
         responseData = {
-          status: "success",
+          success: true,
           token,
+          username: data[0].ten,
         };
       } else {
         responseData = {
-          status: "fail",
+          success: false,
           message: "Tên tài khoản hoặc mật khẩu không chính xác.",
         };
       }
@@ -65,16 +71,21 @@ function authRepository(dbContext) {
       let responseData = null;
       if (data) {
         const token = jwt.sign(
-          { role: "NV", username: req.body.username },
+          {
+            role: "NV",
+            username: req.body.username,
+            idNhanVien: data[0].idNhanVien,
+          },
           process.env.SECRET_KEY
         );
         responseData = {
-          status: "success",
+          success: true,
           token,
+          username: data[0].taikhoanNV,
         };
       } else {
         responseData = {
-          status: "fail",
+          success: false,
           message: "Tên tài khoản hoặc mật khẩu không chính xác.",
         };
       }

@@ -25,25 +25,50 @@ function HocvienRepository(dbContext) {
   }
 
   function getNhuCauHocs(req, res) {
-    if (req.query.salary) {
-      var parameters = [];
+    dbContext.get("GetNhucauhoc", function (error, data) {
+      if (!error) data.success = true;
+      return res.json(response(data, error));
+    });
+  }
 
-      parameters.push({
-        name: "Salary",
-        type: TYPES.Int,
-        val: req.query.salary,
-      });
+  function getByIdHocVien(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idHocVien",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
 
-      var query = "select * from tbl_employee where salary>=@Salary";
+    var checkHocVien = "select idLop from HocVien where idHocVien=@idHocVien";
+    dbContext.getQuery(checkHocVien, parameters, false, function (error, data) {
+      // console.log(data, error);
+      if (data[0].idLop) {
+        data = {
+          success: true,
+          daXepLop: true,
+          message: "Bạn đã được xếp lớp.",
+        };
+        return res.json(response(data, error));
+      }
+      var query =
+        "select * from NhucauHoc inner join DKNhuCauHoc on NhucauHoc.idNhuCau = DKNhuCauHoc.idNhuCau where idHocVien=@idHocVien";
 
       dbContext.getQuery(query, parameters, false, function (error, data) {
-        return res.json(response(data, error));
+        if (error) {
+          return res.json(response(data, error));
+        }
+        if (!data) {
+          getNhuCauHocs(req, res);
+        } else {
+          data = {
+            success: true,
+            daDangKy: true,
+            data,
+          };
+          return res.json(response(data, error));
+        }
       });
-    } else {
-      dbContext.get("GetNhucauhoc", function (error, data) {
-        return res.json(response(data, error));
-      });
-    }
+    });
   }
 
   function GetNhuCauHoc(req, res) {
@@ -64,6 +89,12 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("InsertNhucauhoc", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -87,6 +118,12 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("UpdateNhucauhoc", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -147,7 +184,10 @@ function HocvienRepository(dbContext) {
         rowCount
       ) {
         if (rowCount > 0) {
-          return res.json("Record is deleted");
+          return res.json({
+            success: true,
+            message: "Xóa nhu cầu học thành công.",
+          });
         }
         return res.sendStatus(404);
       });
@@ -182,6 +222,7 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findNhuCauHoc,
     delete: deleteNhuCauHoc,
+    getByIdHocVien: getByIdHocVien,
   };
 }
 

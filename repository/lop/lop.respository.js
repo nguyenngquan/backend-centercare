@@ -25,29 +25,50 @@ function HocvienRepository(dbContext) {
   }
 
   function getLops(req, res) {
-    if (req.query.salary) {
-      var parameters = [];
+    var parameters = [];
 
-      parameters.push({
-        name: "Salary",
-        type: TYPES.Int,
-        val: req.query.salary,
-      });
-
-      var query = "select * from tbl_employee where salary>=@Salary";
-
-      dbContext.getQuery(query, parameters, false, function (error, data) {
-        return res.json(response(data, error));
-      });
-    } else {
-      dbContext.get("GetLop", function (error, data) {
-        return res.json(response(data, error));
-      });
-    }
+    parameters.push({
+      name: "Salary",
+      type: TYPES.Int,
+      val: req.query.salary,
+    });
+    dbContext.get("GetLop", function (error, data) {
+      if (!error) {
+        data.success = true;
+      }
+      return res.json(response(data, error));
+    });
   }
 
   function getLop(req, res) {
-    return res.json(req.data);
+    var parameters = [];
+
+    parameters.push({
+      name: "idLop",
+      type: TYPES.Int,
+      val: req.params.idLop,
+    });
+
+    var query =
+      "select idHocVien, taikhoanHV, ten, gioitinh, ngaysinh, diachi, email, dienthoai from HocVien where idLop = @idLop";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      if (!error) {
+        return res.json(
+          response(
+            {
+              success: true,
+              data: {
+                ...req.data,
+                danhSachLop: data,
+              },
+            },
+            error
+          )
+        );
+      }
+      return res.sendStatus(404);
+    });
   }
 
   function insertLops(req, res) {
@@ -63,13 +84,22 @@ function HocvienRepository(dbContext) {
       type: TYPES.NVarChar,
       val: req.body.tenlop,
     });
-    parameters.push({ name: "idNhom", type: TYPES.Int, val: req.body.idNhom });
+    parameters.push({
+      name: "idNhom",
+      type: TYPES.Int,
+      val: req.body.idNhom,
+    });
 
     // Object.entries(employee).forEach((property)=>{
     //     parameters.push({name:'@'+property[0]})
     // });
 
     dbContext.post("InsertLop", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+        };
+      }
       return res.json(response(data, error));
     });
   }

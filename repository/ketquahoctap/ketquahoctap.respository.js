@@ -46,30 +46,95 @@ function HocvienRepository(dbContext) {
     }
   }
 
+  function getByIdHocVien(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idHocVien",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+
+    var query =
+      "select diem, ngaykiemtra, loaibaiKT, ghichu from KetQuaHocTap inner join KiemTra on KetQuaHocTap.idKiemTra = KiemTra.idKiemTra  inner join HocVien on HocVien.idHocVien = KetQuaHocTap.idHocVien where HocVien.idHocVien=@idHocVien";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data: data ? data : [],
+      };
+      return res.json(response(data, error));
+    });
+  }
+
+  function getByIdKiemTra(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idKiemTra",
+      type: TYPES.Int,
+      val: req.query.idKiemTra,
+    });
+    parameters.push({
+      name: "idLop",
+      type: TYPES.Int,
+      val: req.query.idLop,
+    });
+    console.log(req.query);
+
+    var query =
+      "select * from KetQuaHocTap inner join HocVien on KetQuaHocTap.idHocVien = HocVien.idHocVien where KetQuaHocTap.idKiemTra=@idKiemTra";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      if (!error) {
+        if (!data) {
+          var query =
+            "select * from Lop inner join HocVien on Lop.idLop = HocVien.idLop where Lop.idLop=@idLop";
+          dbContext.getQuery(query, parameters, false, function (error, data) {
+            if (!error) {
+              data = {
+                success: true,
+                data,
+              };
+            }
+            return res.json(response(data, error));
+          });
+        } else {
+          data = {
+            success: true,
+            daCoDiem: true,
+            data,
+          };
+          return res.json(response(data, error));
+        }
+      } else {
+        return res.json(response(data, error));
+      }
+    });
+  }
+
   function getKQHT(req, res) {
     return res.json(req.data);
   }
 
   function insertKQHTs(req, res) {
-    var parameters = [];
+    var query = `INSERT INTO [dbo].KetQuaHocTap ([idHocVien],[idKiemTra],[diem])
+      VALUES
+      ${req.body
+        .map(
+          (item) => `(
+        '${item.idHocVien}',
+        '${item.idKiemTra}',
+        '${item.diem}'
+      )`
+        )
+        .join(",")};`;
 
-    parameters.push({
-      name: "idHocVien",
-      type: TYPES.Int,
-      val: req.body.idHocVien,
-    });
-    parameters.push({
-      name: "idKiemTra",
-      type: TYPES.Int,
-      val: req.body.idKiemTra,
-    });
-    parameters.push({ name: "diem", type: TYPES.Int, val: req.body.diem });
-
-    // Object.entries(employee).forEach((property)=>{
-    //     parameters.push({name:'@'+property[0]})
-    // });
-
-    dbContext.post("InsertKQHT", parameters, function (error, data) {
+    dbContext.getQuery(query, [], false, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -189,6 +254,8 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findKQHT,
     delete: deleteKQHT,
+    getByIdHocVien: getByIdHocVien,
+    getByIdKiemTra: getByIdKiemTra,
   };
 }
 

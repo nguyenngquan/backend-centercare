@@ -45,6 +45,45 @@ function HocvienRepository(dbContext) {
       });
     }
   }
+  function getByIdLop(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idLop",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idLichHoc, tuan, ngayhoc, cahoc, ghichu from LichHoc inner join Lop on Lop.idLop = LichHoc.idLop where Lop.idLop = @idLop";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data,
+      };
+      return res.json(response(data, error));
+    });
+  }
+
+  function getByIdHocVien(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idHocVien",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idLichHoc, tuan, ngayhoc, cahoc, ghichu  from LichHoc inner join Lop on Lop.idLop = LichHoc.idLop inner join HocVien on HocVien.idLop = Lop.idLop where HocVien.idHocVien = @idHocVien";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data: data ? data : [],
+      };
+      return res.json(response(data, error));
+    });
+  }
 
   function getLichHoc(req, res) {
     return res.json(req.data);
@@ -76,12 +115,21 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("insertLichhoc", parameters, function (error, data) {
+      data = {
+        success: true,
+        message: "Thêm lịch học thành công.",
+      };
       return res.json(response(data, error));
     });
   }
 
   function updateLichHocs(req, res) {
     var parameters = [];
+    parameters.push({
+      name: "idLichHoc",
+      type: TYPES.Int,
+      val: req.body.idLichHoc,
+    });
 
     parameters.push({ name: "tuan", type: TYPES.VarChar, val: req.body.tuan });
     parameters.push({
@@ -106,6 +154,10 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("updateLichhoc", parameters, function (error, data) {
+      data = {
+        success: true,
+        message: "Cập nhật lịch học thành công.",
+      };
       return res.json(response(data, error));
     });
   }
@@ -201,6 +253,8 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findLichHoc,
     delete: deleteLichHoc,
+    getByIdLop: getByIdLop,
+    getByIdHocVien: getByIdHocVien,
   };
 }
 

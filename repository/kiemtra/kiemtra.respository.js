@@ -45,6 +45,44 @@ function HocvienRepository(dbContext) {
       });
     }
   }
+  function getByIdLop(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idLop",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idKiemTra, ngaykiemtra, loaibaiKT, ghichu from KiemTra inner join Lop on Lop.idLop = KiemTra.idLop where Lop.idLop = @idLop";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data,
+      };
+      return res.json(response(data, error));
+    });
+  }
+  function getByIdHocVien(req, res) {
+    var parameters = [];
+    parameters.push({
+      name: "idHocVien",
+      type: TYPES.Int,
+      val: req.params.id,
+    });
+    console.log(req.params);
+    var query =
+      "select idKiemTra, ngaykiemtra, loaibaiKT, ghichu from KiemTra inner join Lop on Lop.idLop = KiemTra.idLop inner join HocVien on HocVien.idLop = Lop.idLop where HocVien.idHocVien = @idHocVien";
+
+    dbContext.getQuery(query, parameters, false, function (error, data) {
+      data = {
+        success: true,
+        data: data ? data : [],
+      };
+      return res.json(response(data, error));
+    });
+  }
 
   function getKiemTra(req, res) {
     return res.json(req.data);
@@ -75,6 +113,13 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("insertKiemtra", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          message: "Đã thêm bài kiểm tra mới.",
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -82,6 +127,11 @@ function HocvienRepository(dbContext) {
   function updateKiemTras(req, res) {
     var parameters = [];
 
+    parameters.push({
+      name: "idKiemTra",
+      type: TYPES.Int,
+      val: req.body.idKiemTra,
+    });
     parameters.push({
       name: "ngaykiemtra",
       type: TYPES.DateTime,
@@ -104,6 +154,13 @@ function HocvienRepository(dbContext) {
     // });
 
     dbContext.post("updateKiemtra", parameters, function (error, data) {
+      if (!error) {
+        data = {
+          success: true,
+          message: "Đã cập nhật thông tin bài kiểm tra.",
+          data,
+        };
+      }
       return res.json(response(data, error));
     });
   }
@@ -199,6 +256,8 @@ function HocvienRepository(dbContext) {
     find: SearchEmployee,
     intercept: findKiemTra,
     delete: deleteKiemTra,
+    getByIdLop: getByIdLop,
+    getByIdHocVien: getByIdHocVien,
   };
 }
 
